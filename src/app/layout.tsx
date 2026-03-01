@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { HeaderBreadcrumb } from "@/components/header-breadcrumb";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -43,9 +45,13 @@ export default function RootLayout({
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset>
-                <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-                  <SidebarTrigger className="-ml-1" />
-                  <Separator orientation="vertical" className="mr-2 h-4" />
+                <header className="flex h-14 shrink-0 items-center justify-between border-b px-4">
+                  <div className="flex items-center gap-2">
+                    <SidebarTrigger className="-ml-1" />
+                    <Separator orientation="vertical" className="mr-2 h-4" />
+                    <HeaderBreadcrumb />
+                  </div>
+                  <ThemeToggle />
                 </header>
                 <main className="flex-1">{children}</main>
               </SidebarInset>
