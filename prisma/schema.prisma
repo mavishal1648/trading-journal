@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Trade {
+  id          String      @id @default(uuid())
+  instrument  String      // "NQ" or "ES"
+  direction   String      // "LONG" or "SHORT"
+  entryPrice  Decimal
+  exitPrice   Decimal
+  quantity    Int         // number of contracts
+  riskReward  Decimal     // R:R ratio
+  result      String      // "WIN", "LOSS", "BREAKEVEN"
+  pnl         Decimal     // dollar P&L
+  rating      Int         // 1-5 stars
+  notes       String?     // free text
+  tradeDate   DateTime    // date of trade
+  entryTime   DateTime?
+  exitTime    DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  screenshots Screenshot[]
+  tags        TradeTag[]
+}
+
+model Screenshot {
+  id        String   @id @default(uuid())
+  tradeId   String
+  trade     Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  url       String   // URL pointing to Supabase Storage
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id     String     @id @default(uuid())
+  name   String     @unique
+  color  String     // hex color
+  trades TradeTag[]
+}
+
+model TradeTag {
+  tradeId String
+  tagId   String
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  @@id([tradeId, tagId])
+}
