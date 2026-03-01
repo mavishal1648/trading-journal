@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { CsvUpload } from "@/components/csv-upload";
 import { ImportPreview } from "@/components/import-preview";
-import { parseMT5CSV, type ParsedTrade } from "@/lib/utils/csv-parser";
+import { parseMT5File, type ParsedTrade } from "@/lib/utils/csv-parser";
 import { importTrades, type ImportTradeData } from "@/lib/actions/import";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
@@ -31,7 +31,7 @@ export default function ImportPage() {
   function handleFileLoaded(csvText: string) {
     setParseError(null);
     try {
-      const trades = parseMT5CSV(csvText);
+      const trades = parseMT5File(csvText);
       if (trades.length === 0) {
         toast.error("No valid trades found in CSV");
         return;

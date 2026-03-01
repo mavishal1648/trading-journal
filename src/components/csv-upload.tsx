@@ -52,7 +52,8 @@ export function CsvUpload({ onFileLoaded }: CsvUploadProps) {
       setIsDragging(false);
 
       const file = e.dataTransfer.files?.[0];
-      if (file && file.name.endsWith(".csv")) {
+      const name = file?.name.toLowerCase() ?? "";
+      if (file && (name.endsWith(".csv") || name.endsWith(".html") || name.endsWith(".htm"))) {
         readFile(file);
       }
     },
@@ -114,7 +115,7 @@ export function CsvUpload({ onFileLoaded }: CsvUploadProps) {
               }`}
             />
             <p className="text-center text-sm text-muted-foreground">
-              Drag &amp; drop your MT5 CSV file here, or click to browse
+              Drag &amp; drop your MT5 report here (HTML or CSV), or click to browse
             </p>
           </div>
         )}
@@ -122,7 +123,7 @@ export function CsvUpload({ onFileLoaded }: CsvUploadProps) {
         <input
           ref={inputRef}
           type="file"
-          accept=".csv"
+          accept=".csv,.html,.htm"
           onChange={handleFileChange}
           className="hidden"
         />

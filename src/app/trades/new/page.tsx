@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Upload, ChevronDown, ChevronUp } from "lucide-react";
 import { TradeForm } from "@/components/trade-form";
-import { parseMT5CSV, type ParsedTrade } from "@/lib/utils/csv-parser";
+import { parseMT5File, type ParsedTrade } from "@/lib/utils/csv-parser";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils/format";
@@ -23,7 +23,7 @@ export default function NewTradePage() {
     reader.onload = (evt) => {
       try {
         const text = evt.target?.result as string;
-        const trades = parseMT5CSV(text);
+        const trades = parseMT5File(text);
         if (trades.length === 0) {
           toast.error("No valid NQ/ES trades found in CSV");
           return;
@@ -75,7 +75,7 @@ export default function NewTradePage() {
             <div className="flex items-center gap-3">
               <input
                 type="file"
-                accept=".csv"
+                accept=".csv,.html,.htm"
                 onChange={handleFileUpload}
                 className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
               />
