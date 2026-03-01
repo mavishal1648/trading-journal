@@ -46,6 +46,7 @@ import { calculatePnl } from "@/lib/utils/pnl";
 import { uploadScreenshot } from "@/lib/utils/screenshots";
 import { createTrade, updateTrade } from "@/lib/actions/trades";
 import type { TradeWithRelations } from "@/lib/types";
+import type { ParsedTrade } from "@/lib/utils/csv-parser";
 import { cn } from "@/lib/utils";
 
 const tradeFormSchema = z.object({
@@ -70,57 +71,85 @@ type TradeFormValues = z.infer<typeof tradeFormSchema>;
 interface TradeFormProps {
   mode: "create" | "edit";
   initialData?: TradeWithRelations;
+  prefillData?: ParsedTrade;
 }
 
-export function TradeForm({ mode, initialData }: TradeFormProps) {
+export function TradeForm({ mode, initialData, prefillData }: TradeFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [screenshots, setScreenshots] = useState<File[]>([]);
   const [existingUrls, setExistingUrls] = useState<string[]>(
     initialData?.screenshots.map((s) => s.url) ?? []
   );
-  const [pnlManual, setPnlManual] = useState(false);
+  const [pnlManual, setPnlManual] = useState(!!prefillData);
+
+  function getDefaultValues(): Partial<TradeFormValues> {
+    if (initialData) {
+      return {
+        instrument: initialData.instrument,
+        direction: initialData.direction,
+        entryPrice: Number(initialData.entryPrice),
+        exitPrice: Number(initialData.exitPrice),
+        quantity: initialData.quantity,
+        riskReward: Number(initialData.riskReward),
+        result: initialData.result,
+        pnl: Number(initialData.pnl),
+        rating: initialData.rating,
+        tradeDate: new Date(initialData.tradeDate),
+        entryTime: initialData.entryTime
+          ? format(new Date(initialData.entryTime), "HH:mm")
+          : "",
+        exitTime: initialData.exitTime
+          ? format(new Date(initialData.exitTime), "HH:mm")
+          : "",
+        notes: initialData.notes ?? "",
+        tagIds: initialData.tags.map((t) => t.tagId),
+      };
+    }
+    if (prefillData) {
+      return {
+        instrument: prefillData.instrument,
+        direction: prefillData.direction,
+        entryPrice: prefillData.entryPrice,
+        exitPrice: prefillData.exitPrice,
+        quantity: prefillData.quantity,
+        riskReward: undefined as unknown as number,
+        result: prefillData.result,
+        pnl: prefillData.pnl,
+        rating: 3,
+        tradeDate: prefillData.tradeDate,
+        entryTime: prefillData.entryTime
+          ? format(prefillData.entryTime, "HH:mm")
+          : "",
+        exitTime: prefillData.exitTime
+          ? format(prefillData.exitTime, "HH:mm")
+          : "",
+        notes: "",
+        tagIds: [],
+      };
+    }
+    return {
+      instrument: "",
+      direction: "",
+      entryPrice: undefined as unknown as number,
+      exitPrice: undefined as unknown as number,
+      quantity: 1,
+      riskReward: undefined as unknown as number,
+      result: "",
+      pnl: 0,
+      rating: 3,
+      tradeDate: new Date(),
+      entryTime: "",
+      exitTime: "",
+      notes: "",
+      tagIds: [],
+    };
+  }
 
   const form = useForm<TradeFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(tradeFormSchema) as any,
-    defaultValues: initialData
-      ? {
-          instrument: initialData.instrument,
-          direction: initialData.direction,
-          entryPrice: Number(initialData.entryPrice),
-          exitPrice: Number(initialData.exitPrice),
-          quantity: initialData.quantity,
-          riskReward: Number(initialData.riskReward),
-          result: initialData.result,
-          pnl: Number(initialData.pnl),
-          rating: initialData.rating,
-          tradeDate: new Date(initialData.tradeDate),
-          entryTime: initialData.entryTime
-            ? format(new Date(initialData.entryTime), "HH:mm")
-            : "",
-          exitTime: initialData.exitTime
-            ? format(new Date(initialData.exitTime), "HH:mm")
-            : "",
-          notes: initialData.notes ?? "",
-          tagIds: initialData.tags.map((t) => t.tagId),
-        }
-      : {
-          instrument: "",
-          direction: "",
-          entryPrice: undefined as unknown as number,
-          exitPrice: undefined as unknown as number,
-          quantity: 1,
-          riskReward: undefined as unknown as number,
-          result: "",
-          pnl: 0,
-          rating: 3,
-          tradeDate: new Date(),
-          entryTime: "",
-          exitTime: "",
-          notes: "",
-          tagIds: [],
-        },
+    defaultValues: getDefaultValues(),
   });
 
   // Auto-calculate P&L
